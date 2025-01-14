@@ -1,0 +1,12 @@
+Package: stringharmonizeR
+Type: Package
+Title: An interactive tool to help harmonize a vector of strings
+Version: 0.1.0
+Authors@R: 
+    person("Vania", "Wang", , "wang.vania@gmail.com", role = c("cre", "aut"))
+Maintainer: Vania Wang <wang.vania@gmail.com>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
