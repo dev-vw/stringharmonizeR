@@ -3,13 +3,17 @@
 #' @param vec string vector to modify and check
 #' @param compvec comparison string vector
 #'
-#' @return
+#' @return a list with outvec, vec_tbl, and compvec_tbl
 #' @export
-#'
+
 #' @examples
 run_harmonizeR <- function(vec, compvec) {
   fenv <- new.env()
   start_i <- 1
+
+  compvec_tbl <- data.frame(polyname = compvec, matchname = NA)
+
+  outvec <- rep(NA, length(vec))
 
   cat(paste("This is a interative tool to help you match geographical names",
             "against a user-defined standard.",
@@ -44,7 +48,7 @@ run_harmonizeR <- function(vec, compvec) {
   load_save <- readline("Would you like to load a saved state (yes, no): ")
 
   while (!(tolower(load_save) %in% c("no", "yes"))) {
-    can_start <- readline("Input not recognized. Please input a valid response (YES, NO): ")
+    load_save <- readline("Input not recognized. Please input a valid response (yes, no): ")
   }
 
   if (tolower(load_save == "yes")) {
@@ -61,55 +65,77 @@ run_harmonizeR <- function(vec, compvec) {
   }
 
   for (i in start_i:length(vec)) {
-    print(paste0("Index ", i, " of ", length(vec), ": ", vec[i]))
 
-    choice <- readline("What do you want to do? (modify, save, quit): ")
+    if (!tolower(vec[i]) %in% tolower(compvec)) {
 
-    while (!(tolower(choice) %in% c("modify", "save", "quit"))) {
-      choice <- readline("Input not recognized. What do you want to do? (modify, save, quit): ")
-    }
+      print(paste0("Index ", i, " of ", length(vec), ": ", vec[i]))
 
-    if (tolower(choice) == "quit") {
-      return("Quitting interactive string matching tool...")
-    } else if (tolower(choice) == "modify") {
+      choice <- readline("What do you want to do? (modify, save, quit): ")
 
-      # get a df of top three matches from compvec
-      dist <- 1 - stringdist::stringdist(compvec, vec[i], method = "lv") / nchar(compvec)
-      dist_df <- data.frame(geoname = compvec, dist = dist)
-
-      top_dist <- dist_df |> dplyr::arrange(desc(dist)) |> head(3)
-
-      # display df to user
-      print(top_dist)
-
-      mod_choice <- readline("Select string to replace current name (1, 2, 3). Select 4 to input your own string: ")
-
-      while (!(tolower(mod_choice) %in% c(1, 2, 3, 4))) {
-        mod_choice <- readline("Input not recognized. Select name to replace current name (1, 2, 3): ")
+      while (!(tolower(choice) %in% c("modify", "save", "quit"))) {
+        choice <- readline("Input not recognized. What do you want to do? (modify, save, quit): ")
       }
 
-      # force numeric
-      mod_choice <- as.numeric(mod_choice)
+      if (tolower(choice) == "quit") {
+        return("Quitting interactive string matching tool...")
+      } else if (tolower(choice) == "modify") {
 
-      if (mod_choice %in% c(1, 2, 3)) {
-        vec[i] <- top_dist$geoname[mod_choice]
-      } else if (mod_choice == 4) {
-        new_string <- readline("Please enter your custom string: ")
-        vec[i] <- new_string
+        # get a df of top three matches from compvec
+        dist <- 1 - stringdist::stringdist(compvec, vec[i], method = "lv") / nchar(compvec)
+        dist_df <- data.frame(geoname = compvec, dist = dist)
+
+        top_dist <- dist_df |> dplyr::arrange(desc(dist)) |> head(3)
+
+        # display df to user
+        print(top_dist)
+
+        mod_choice <- readline("Select string to replace current name (1, 2, 3). Select 4 to input your own string: ")
+
+        while (!(tolower(mod_choice) %in% c(1, 2, 3, 4))) {
+          mod_choice <- readline("Input not recognized. Select name to replace current name (1, 2, 3): ")
+        }
+
+        # force numeric
+        mod_choice <- as.numeric(mod_choice)
+
+        if (mod_choice %in% c(1, 2, 3)) {
+          outvec[i] <- tolower(top_dist$geoname[mod_choice])
+          compindex <- which(tolower(outvec[i]) == tolower(compvec))
+          compvec_tbl$matchname[compindex] <- tolower(outvec[i])
+        } else if (mod_choice == 4) {
+          new_string <- readline("Please enter your custom string: ")
+          outvec[i] <- tolower(new_string)
+        }
+
+        print("Current output vector state:")
+        print(outvec)
+        cat("\n")
+
+      } else if (tolower(choice) == "save") {
+        # save current state of vectors: the index, and vec
+        assign("index", i)
+        assign("saved_vec", outvec)
+
+        saved_state <- list(index = i, saved_vec = outvec)
+
+        cat("Saving state as saved_state.rda")
+        save(i, outvec, file = paste0(rstudioapi::selectDirectory(), "/saved_state.rda"))
       }
+    } else {
+      compindex <- which(tolower(vec[i]) == tolower(compvec))
 
-      print("Current vector state:")
-      print(vec)
+      compvec_tbl$matchname[compindex] <- tolower(vec[i])
+      outvec[i] <- tolower(vec[i])
 
-    } else if (tolower(choice) == "save") {
-      # save current state of vectors: the index, and vec
-      assign("index", i)
-      assign("saved_vec", vec)
+      print(compvec_tbl)
 
-      saved_state <- list(index = i, saved_vec = vec)
-
-      cat("Saving state as saved_state.rda")
-      save(i, vec, file = paste0(rstudioapi::selectDirectory(), "/saved_state.rda"))
+      print("Current output vector state:")
+      print(outvec)
+      cat("\n")
     }
   }
+
+  return(list(outvec = outvec,
+              vec_tbl = data.frame(polyname = vec, matchname = outvec),
+              compvec_tbl = compvec_tbl))
 }
