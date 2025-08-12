@@ -86,7 +86,7 @@ run_harmonizeR <- function(vec, compvec) {
         dist <- 1 - stringdist::stringdist(compvec, vec[i], method = "lv") / nchar(compvec)
         dist_df <- data.frame(geoname = compvec, dist = dist)
 
-        top_dist <- dist_df |> dplyr::arrange(desc(dist)) |> head(3)
+        top_dist <- dist_df |> dplyr::arrange(desc(dist)) |> head(10)
 
         # display df to user
         print(top_dist)
