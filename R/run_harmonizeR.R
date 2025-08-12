@@ -108,6 +108,9 @@ run_harmonizeR <- function(vec, compvec) {
         } else if (mod_choice == 4) {
           new_string <- readline("Please enter your custom string: ")
           outvec[i] <- tolower(new_string)
+
+          compindex <- which(tolower(outvec[i]) == tolower(compvec))
+          compvec_tbl$matchname[compindex] <- tolower(outvec[i])
         } else if (mod_choice == 5) {
           outvec[i] <- NA
         }
