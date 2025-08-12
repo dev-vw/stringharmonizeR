@@ -89,9 +89,9 @@ run_harmonizeR <- function(vec, compvec) {
         # display df to user
         print(top_dist)
 
-        mod_choice <- readline("Select string to replace current name (1, 2, 3). Select 4 to input your own string: ")
+        mod_choice <- readline("Select string to replace current name (1, 2, 3). Select 4 to input your own string. Select 5 to assign an NA value to this string. ")
 
-        while (!(tolower(mod_choice) %in% c(1, 2, 3, 4))) {
+        while (!(tolower(mod_choice) %in% c(1, 2, 3, 4, 5))) {
           mod_choice <- readline("Input not recognized. Select name to replace current name (1, 2, 3): ")
         }
 
@@ -105,6 +105,8 @@ run_harmonizeR <- function(vec, compvec) {
         } else if (mod_choice == 4) {
           new_string <- readline("Please enter your custom string: ")
           outvec[i] <- tolower(new_string)
+        } else if (mod_choice == 5) {
+          outvec[i] <- NA
         }
 
         print("Current output vector state:")
