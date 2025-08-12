@@ -3,17 +3,17 @@
 #' @param vec string vector to modify and check
 #' @param compvec comparison string vector
 #'
+#' @importFrom dplyr left_join
+#'
 #' @return a list with outvec, vec_tbl, and compvec_tbl
 #' @export
-
 #' @examples
 run_harmonizeR <- function(vec, compvec) {
   fenv <- new.env()
   start_i <- 1
 
   compvec_tbl <- data.frame(polyname = compvec,
-                            matchname = NA,
-                            crosswalk_id = gen_crosswalkid_vector(length(compvec)))
+                            matchname = NA)
 
   outvec <- rep(NA, length(vec))
 
@@ -40,7 +40,7 @@ run_harmonizeR <- function(vec, compvec) {
   can_start <- readline("Would you like to begin (yes, no): ")
 
   while (!(tolower(can_start) %in% c("no", "yes"))) {
-    can_start <- readline("Input not recognized. Please input a valid response (YES, NO): ")
+    can_start <- readline("Input not recognized. Please input a valid response (yes, no): ")
   }
 
   if (tolower(can_start) == "no") {
@@ -102,6 +102,7 @@ run_harmonizeR <- function(vec, compvec) {
 
         if (mod_choice %in% c(1, 2, 3)) {
           outvec[i] <- tolower(top_dist$geoname[mod_choice])
+
           compindex <- which(tolower(outvec[i]) == tolower(compvec))
           compvec_tbl$matchname[compindex] <- tolower(outvec[i])
         } else if (mod_choice == 4) {
@@ -139,9 +140,18 @@ run_harmonizeR <- function(vec, compvec) {
     }
   }
 
+  crosswalk_id <- gen_crosswalkid_vector(length(vec))
+
+  match_tbl <- data.frame(matchname = outvec,
+                          crosswalk_id = crosswalk_id)
+
+  vec_tbl <- data.frame(polyname = vec,
+                        matchname = outvec,
+                        crosswalk_id = crosswalk_id)
+
+  compvec_tbl <- dplyr::left_join(compvec_tbl, match_tbl, by = "matchname")
+
   return(list(outvec = outvec,
-              vec_tbl = data.frame(polyname = vec,
-                                   matchname = outvec,
-                                   crosswalk_id = gen_crosswalkid_vector(length(vec))),
+              vec_tbl = vec_tbl,
               compvec_tbl = compvec_tbl))
 }
