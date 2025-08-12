@@ -11,7 +11,9 @@ run_harmonizeR <- function(vec, compvec) {
   fenv <- new.env()
   start_i <- 1
 
-  compvec_tbl <- data.frame(polyname = compvec, matchname = NA)
+  compvec_tbl <- data.frame(polyname = compvec,
+                            matchname = NA,
+                            crosswalk_id = gen_crosswalkid_vector(length(compvec)))
 
   outvec <- rep(NA, length(vec))
 
@@ -138,6 +140,8 @@ run_harmonizeR <- function(vec, compvec) {
   }
 
   return(list(outvec = outvec,
-              vec_tbl = data.frame(polyname = vec, matchname = outvec),
+              vec_tbl = data.frame(polyname = vec,
+                                   matchname = outvec,
+                                   crosswalk_id = gen_crosswalkid_vector(length(vec))),
               compvec_tbl = compvec_tbl))
 }
