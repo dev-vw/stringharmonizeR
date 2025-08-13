@@ -91,27 +91,27 @@ run_harmonizeR <- function(vec, compvec) {
         # display df to user
         print(top_dist)
 
-        mod_choice <- readline("Select string to replace current name (1, 2, 3). Select 4 to input your own string. Select 5 to assign an NA value to this string. ")
+        mod_choice <- readline("Select string to replace current name (1 to 10). Select 0 to input your own string. Select 99 to assign an NA value to this string. ")
 
-        while (!(tolower(mod_choice) %in% c(1, 2, 3, 4, 5))) {
-          mod_choice <- readline("Input not recognized. Select name to replace current name (1, 2, 3): ")
+        while (!(tolower(mod_choice) %in% c(0:10, 99))) {
+          mod_choice <- readline("Input not recognized. Select a valid numerical response: ")
         }
 
         # force numeric
         mod_choice <- as.numeric(mod_choice)
 
-        if (mod_choice %in% c(1, 2, 3)) {
+        if (mod_choice %in% c(1:10)) {
           outvec[i] <- tolower(top_dist$geoname[mod_choice])
 
           compindex <- which(tolower(outvec[i]) == tolower(compvec))
           compvec_tbl$matchname[compindex] <- tolower(outvec[i])
-        } else if (mod_choice == 4) {
+        } else if (mod_choice == 0) {
           new_string <- readline("Please enter your custom string: ")
           outvec[i] <- tolower(new_string)
 
           compindex <- which(tolower(outvec[i]) == tolower(compvec))
           compvec_tbl$matchname[compindex] <- tolower(outvec[i])
-        } else if (mod_choice == 5) {
+        } else if (mod_choice == 99) {
           outvec[i] <- NA
         }
 
