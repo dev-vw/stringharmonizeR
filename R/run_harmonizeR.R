@@ -9,6 +9,7 @@
 #' @export
 #' @examples
 run_harmonizeR <- function(vec, compvec) {
+  set.seed(1234)
   fenv <- new.env()
   start_i <- 1
 
