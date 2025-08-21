@@ -9,7 +9,8 @@
 #' @export
 #' @examples
 run_harmonizeR <- function(vec, compvec) {
-  set.seed(1234)
+  set.seed(1234) # for reproducibly
+
   fenv <- new.env()
   start_i <- 1
 
@@ -38,23 +39,23 @@ run_harmonizeR <- function(vec, compvec) {
             "object. You will be able to save your state as an .rda file.",
             "\n", sep="\n"))
 
-  can_start <- readline("Would you like to begin (yes, no): ")
+  can_start <- readline("Would you like to begin (yes [y], no [n]): ")
 
-  while (!(tolower(can_start) %in% c("no", "yes"))) {
+  while (!(tolower(can_start) %in% c("n", "y"))) {
     can_start <- readline("Input not recognized. Please input a valid response (yes, no): ")
   }
 
-  if (tolower(can_start) == "no") {
+  if (tolower(can_start) == "n") {
     return("Quitting interactive string matching tool...")
   }
 
-  load_save <- readline("Would you like to load a saved state (yes, no): ")
+  load_save <- readline("Would you like to load a saved state (yes [y], no [n]): ")
 
-  while (!(tolower(load_save) %in% c("no", "yes"))) {
-    load_save <- readline("Input not recognized. Please input a valid response (yes, no): ")
+  while (!(tolower(load_save) %in% c("n", "y"))) {
+    load_save <- readline("Input not recognized. Please input a valid response (yes [y], no [n]): ")
   }
 
-  if (tolower(load_save == "yes")) {
+  if (tolower(load_save == "y")) {
     path <- file.choose()
 
     while (!(tolower(tools::file_ext(path)) %in% c("rda", "rda", "rdata"))) {
@@ -63,8 +64,10 @@ run_harmonizeR <- function(vec, compvec) {
     }
 
     load(file = path, envir = fenv)
-    start_i <- fenv$i
-    vec <- fenv$vec
+
+    start_i <- fenv$saved_state$index
+    outvec <- fenv$saved_state$outvec
+    compvec_tbl <- fenv$saved_state$compvec_tbl
   }
 
   for (i in start_i:length(vec)) {
@@ -73,15 +76,15 @@ run_harmonizeR <- function(vec, compvec) {
 
       print(paste0("Index ", i, " of ", length(vec), ": ", vec[i]))
 
-      choice <- readline("What do you want to do? (modify, save, quit): ")
+      choice <- readline("What do you want to do? (modify [m], save [s], quit [q]): ")
 
-      while (!(tolower(choice) %in% c("modify", "save", "quit"))) {
-        choice <- readline("Input not recognized. What do you want to do? (modify, save, quit): ")
+      while (!(tolower(choice) %in% c("m", "s", "q"))) {
+        choice <- readline("Input not recognized. What do you want to do? (modify [m], save [s], quit [q]): ")
       }
 
-      if (tolower(choice) == "quit") {
+      if (tolower(choice) == "q") {
         return("Quitting interactive string matching tool...")
-      } else if (tolower(choice) == "modify") {
+      } else if (tolower(choice) == "m") {
 
         # get a df of top three matches from compvec
         dist <- 1 - stringdist::stringdist(compvec, vec[i], method = "lv") / nchar(compvec)
@@ -92,7 +95,7 @@ run_harmonizeR <- function(vec, compvec) {
         # display df to user
         print(top_dist)
 
-        mod_choice <- readline("Select string to replace current name (1 to 10). Select 0 to input your own string. Select 99 to assign an NA value to this string. ")
+        mod_choice <- readline("Select string to match the current name (1 to 10). Select 0 to input your own string. Select 99 to assign an NA value to this string. ")
 
         while (!(tolower(mod_choice) %in% c(0:10, 99))) {
           mod_choice <- readline("Input not recognized. Select a valid numerical response: ")
@@ -102,15 +105,38 @@ run_harmonizeR <- function(vec, compvec) {
         mod_choice <- as.numeric(mod_choice)
 
         if (mod_choice %in% c(1:10)) {
-          outvec[i] <- tolower(top_dist$geoname[mod_choice])
+          match_name <- tolower(top_dist$geoname[mod_choice])
 
-          compindex <- which(tolower(outvec[i]) == tolower(compvec))
-          compvec_tbl$matchname[compindex] <- tolower(outvec[i])
+          to_swap <- readline(paste0("Would you like to keep the current spelling (select 0: ",
+                                     tolower(vec[i]),
+                                     ") or the comparison spelling (select 1: ",
+                                     match_name,
+                                     ")? "))
+
+          while (!(tolower(to_swap) %in% c(0, 1))) {
+            to_swap <- readline("Input not recognized. Select 0 to keep or 1 to swap to the matched namme: ")
+          }
+
+          # force numeric
+          to_swap <- as.numeric(to_swap)
+
+          if (to_swap == 1) {
+            outvec[i] <- match_name
+
+            compindex <- which(match_name == tolower(compvec))
+            compvec_tbl$matchname[compindex] <- tolower(outvec[i])
+          } else {
+            outvec[i] <- tolower(vec[i])
+
+            compindex <- which(match_name == tolower(compvec))
+            compvec_tbl$matchname[compindex] <- tolower(outvec[i])
+          }
         } else if (mod_choice == 0) {
           new_string <- readline("Please enter your custom string: ")
           outvec[i] <- tolower(new_string)
 
-          compindex <- which(tolower(outvec[i]) == tolower(compvec))
+          # TODO: will need to be rechecked
+          compindex <- which(outvec[i] == tolower(compvec))
           compvec_tbl$matchname[compindex] <- tolower(outvec[i])
         } else if (mod_choice == 99) {
           outvec[i] <- NA
@@ -120,15 +146,17 @@ run_harmonizeR <- function(vec, compvec) {
         print(outvec)
         cat("\n")
 
-      } else if (tolower(choice) == "save") {
+      } else if (tolower(choice) == "s") {
         # save current state of vectors: the index, and vec
-        assign("index", i)
-        assign("saved_vec", outvec)
+        #assign("index", i)
+        #assign("saved_vec", outvec)
 
-        saved_state <- list(index = i, saved_vec = outvec)
+        saved_state <- list(index = i,
+                            outvec = outvec,
+                            compvec_tbl = compvec_tbl)
 
         cat("Saving state as saved_state.rda")
-        save(i, outvec, file = paste0(rstudioapi::selectDirectory(), "/saved_state.rda"))
+        save(saved_state, file = paste0(rstudioapi::selectDirectory(), "/saved_state.rda"))
       }
     } else {
       compindex <- which(tolower(vec[i]) == tolower(compvec))
