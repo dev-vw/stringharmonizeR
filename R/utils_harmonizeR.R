@@ -22,8 +22,12 @@ gen_crosswalkid <- function(len = 8) {
 #' @export
 #'
 #' @examples
-gen_crosswalkid_vector <- function(n, len = 8) {
-  candidates <- replicate(n * 2, gen_crosswalkid(len))
+gen_crosswalkid_vector <- function(wordvec, len = 8) {
+  candidates <- replicate(length(wordvec) * 2, gen_crosswalkid(len))
 
-  sample(unique(candidates), n, replace = FALSE)
+  candidates <- sample(unique(candidates), length(wordvec), replace = FALSE)
+
+  candidates[which(is.na(wordvec))] <- NA
+
+  return(candidates)
 }

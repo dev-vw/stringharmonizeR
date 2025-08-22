@@ -132,12 +132,16 @@ run_harmonizeR <- function(vec, compvec) {
             compvec_tbl$matchname[compindex] <- tolower(outvec[i])
           }
         } else if (mod_choice == 0) {
-          new_string <- readline("Please enter your custom string: ")
-          outvec[i] <- tolower(new_string)
+          new_string <- tolower(readline("Please enter your custom string: "))
+          outvec[i] <- new_string
 
-          # TODO: will need to be rechecked
-          compindex <- which(outvec[i] == tolower(compvec))
-          compvec_tbl$matchname[compindex] <- tolower(outvec[i])
+          if (any(new_string == tolower(compvec))) {
+            compindex <- which(new_string == tolower(compvec))
+            compvec_tbl$matchname[compindex] <- new_string
+          } else {
+            compvec_tbl <- rbind(compvec_tbl,
+                                 data.frame(polyname = NA, matchname = new_string))
+          }
         } else if (mod_choice == 99) {
           outvec[i] <- NA
         }
@@ -147,10 +151,8 @@ run_harmonizeR <- function(vec, compvec) {
         cat("\n")
 
       } else if (tolower(choice) == "s") {
-        # save current state of vectors: the index, and vec
-        #assign("index", i)
-        #assign("saved_vec", outvec)
-
+        # save current state of vectors: the index, outvec, and compvec_tbl
+        # NOTE that vec_tbl is generated at the end of the loop
         saved_state <- list(index = i,
                             outvec = outvec,
                             compvec_tbl = compvec_tbl)
@@ -172,7 +174,7 @@ run_harmonizeR <- function(vec, compvec) {
     }
   }
 
-  crosswalk_id <- gen_crosswalkid_vector(length(vec))
+  crosswalk_id <- gen_crosswalkid_vector(outvec)
 
   match_tbl <- data.frame(matchname = outvec,
                           crosswalk_id = crosswalk_id)
