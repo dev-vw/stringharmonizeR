@@ -1,4 +1,4 @@
-#' Run validateR
+#' Run harmonizeR
 #'
 #' @param vec string vector to modify and check
 #' @param compvec comparison string vector
