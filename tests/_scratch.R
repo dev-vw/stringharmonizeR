@@ -20,5 +20,3 @@ cvec <- census_shp_lst$angola$adm1 %>% pull(AREA_NAME)
 pvec <- cou_shp_lst$angola$adm1 %>% pull(name)
 
 ovec <- run_harmonizeR(pvec, cvec)
-
-
