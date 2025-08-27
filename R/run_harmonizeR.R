@@ -18,6 +18,7 @@ run_harmonizeR <- function(vec, compvec) {
                             matchname = NA)
 
   outvec <- rep(NA, length(vec))
+  orig_vec <- NULL
 
   cat(paste("This is a interative tool to help you match geographical names",
             "against a user-defined standard.",
@@ -41,34 +42,63 @@ run_harmonizeR <- function(vec, compvec) {
 
   can_start <- readline("Would you like to begin (yes [y], no [n]): ")
 
-  while (!(tolower(can_start) %in% c("n", "y"))) {
-    can_start <- readline("Input not recognized. Please input a valid response (yes, no): ")
-  }
+  can_start <- bin_resp_not_recog(can_start)
 
   if (tolower(can_start) == "n") {
     return("Quitting interactive string matching tool...")
   }
 
-  load_save <- readline("Would you like to load a saved state (yes [y], no [n]): ")
+  # add or remove suffix ----------------------------------------------------
+  alter_suffix_prefix <- readline("Would you like to remove a prefix or suffix to vec (yes [y], no [n]): ")
 
-  while (!(tolower(load_save) %in% c("n", "y"))) {
-    load_save <- readline("Input not recognized. Please input a valid response (yes [y], no [n]): ")
+  alter_suffix_prefix <- bin_resp_not_recog(alter_suffix_prefix)
+
+  # if (tolower(alter_suffix_prefix) == "n") {
+  #   return("Quitting interactive string matching tool...")
+  # }
+
+  while (tolower(alter_suffix_prefix == "y")) {
+    orig_vec <- vec
+
+    regex_string <- readline("What is your replacement string? It can be literal or a regex (use '_' to mark spaces at the beginning or end of your input): ")
+    regex_string <- sub('_', " ", regex_string)
+
+    cat("\nThis is vec before the replacement: ")
+    print(vec)
+
+    vec <- gsub(regex_string, "", vec)
+
+    cat("\nThis is vec after the replacement: ")
+    print(vec)
+
+    alter_suffix_prefix <- readline("Would you like to remove another prefix or suffix (yes [y], no [n])? ")
+
+    alter_suffix_prefix <- bin_resp_not_recog(alter_suffix_prefix)
   }
 
-  if (tolower(load_save == "y")) {
-    path <- file.choose()
+  # load save ---------------------------------------------------------------
+  if (is.null(orig_vec)) {
+    load_save <- readline("Would you like to load a saved state (yes [y], no [n]): ")
 
-    while (!(tolower(tools::file_ext(path)) %in% c("rda", "rda", "rdata"))) {
-      print("File is not the correct extension. Please upload your .rda (.RData) file now: ")
+    load_save <- bin_resp_not_recog(load_save)
+
+    if (tolower(load_save == "y")) {
       path <- file.choose()
+
+      while (!(tolower(tools::file_ext(path)) %in% c("rda", "rdata"))) {
+        print("File is not the correct extension. Please upload your .rda (.RData) file now: ")
+        path <- file.choose()
+      }
+
+      load(file = path, envir = fenv)
+
+      start_i <- fenv$saved_state$index
+      outvec <- fenv$saved_state$outvec
+      compvec_tbl <- fenv$saved_state$compvec_tbl
     }
-
-    load(file = path, envir = fenv)
-
-    start_i <- fenv$saved_state$index
-    outvec <- fenv$saved_state$outvec
-    compvec_tbl <- fenv$saved_state$compvec_tbl
   }
+
+  # start loop through vec --------------------------------------------------
 
   for (i in start_i:length(vec)) {
 
@@ -179,7 +209,8 @@ run_harmonizeR <- function(vec, compvec) {
   match_tbl <- data.frame(matchname = outvec,
                           crosswalk_id = crosswalk_id)
 
-  vec_tbl <- data.frame(polyname = vec,
+  polyname <- if (!is.na(orig_vec)) orig_vec else vec # was a prefix/suffix removed?
+  vec_tbl <- data.frame(polyname = polyname,
                         matchname = outvec,
                         crosswalk_id = crosswalk_id)
 

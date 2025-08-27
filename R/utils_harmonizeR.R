@@ -1,3 +1,18 @@
+#' Query response until valid
+#'
+#' @param response
+#'
+#' @return a string, y or n
+bin_resp_not_recog <- function(response,
+                               choices = c("n", "y"),
+                               error_string = "Input not recognized. Please input a valid response (yes [y], no [n]): ") {
+  while (!(tolower(response) %in% choices)) {
+    response <- readline(error_string)
+  }
+
+  return(response)
+}
+
 #' Generates a random crosswalk IDs from capital letters and numbers
 #'
 #' @param len an int, defaulting to 8, specifying char length of crosswalk ID
@@ -11,7 +26,6 @@ gen_crosswalkid <- function(len = 8) {
 
   return(paste0(sample(chars, len, replace = TRUE), collapse = ""))
 }
-
 
 #' Generates a vector of unique crosswalk IDs
 #'
