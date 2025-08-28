@@ -209,7 +209,7 @@ run_harmonizeR <- function(vec, compvec) {
   match_tbl <- data.frame(matchname = outvec,
                           crosswalk_id = crosswalk_id)
 
-  polyname <- if (!is.na(orig_vec)) orig_vec else vec # was a prefix/suffix removed?
+  polyname <- if (!is.null(orig_vec)) orig_vec else vec # was a prefix/suffix removed?
   vec_tbl <- data.frame(polyname = polyname,
                         matchname = outvec,
                         crosswalk_id = crosswalk_id)
