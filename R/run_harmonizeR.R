@@ -56,9 +56,9 @@ run_harmonizeR <- function(vec, compvec) {
   # if (tolower(alter_suffix_prefix) == "n") {
   #   return("Quitting interactive string matching tool...")
   # }
+  orig_vec <- vec
 
   while (tolower(alter_suffix_prefix == "y")) {
-    orig_vec <- vec
 
     regex_string <- readline("What is your replacement string? It can be literal or a regex (use '_' to mark spaces at the beginning or end of your input): ")
     regex_string <- sub('_', " ", regex_string)
