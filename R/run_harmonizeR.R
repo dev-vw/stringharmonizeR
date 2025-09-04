@@ -77,26 +77,26 @@ run_harmonizeR <- function(vec, compvec) {
   }
 
   # load save ---------------------------------------------------------------
-  if (is.null(orig_vec)) {
-    load_save <- readline("Would you like to load a saved state (yes [y], no [n]): ")
 
-    load_save <- bin_resp_not_recog(load_save)
+  load_save <- readline("Would you like to load a saved state (yes [y], no [n]): ")
 
-    if (tolower(load_save == "y")) {
+  load_save <- bin_resp_not_recog(load_save)
+
+  if (tolower(load_save == "y")) {
+    path <- file.choose()
+
+    while (!(tolower(tools::file_ext(path)) %in% c("rda", "rdata"))) {
+      print("File is not the correct extension. Please upload your .rda (.RData) file now: ")
       path <- file.choose()
-
-      while (!(tolower(tools::file_ext(path)) %in% c("rda", "rdata"))) {
-        print("File is not the correct extension. Please upload your .rda (.RData) file now: ")
-        path <- file.choose()
-      }
-
-      load(file = path, envir = fenv)
-
-      start_i <- fenv$saved_state$index
-      outvec <- fenv$saved_state$outvec
-      compvec_tbl <- fenv$saved_state$compvec_tbl
     }
+
+    load(file = path, envir = fenv)
+
+    start_i <- fenv$saved_state$index
+    outvec <- fenv$saved_state$outvec
+    compvec_tbl <- fenv$saved_state$compvec_tbl
   }
+
 
   # start loop through vec --------------------------------------------------
 
