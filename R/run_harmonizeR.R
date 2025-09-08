@@ -66,6 +66,13 @@ run_harmonizeR <- function(vec, compvec) {
 
     start_i <- fenv$saved_state$index
     outvec <- fenv$saved_state$outvec
+
+    vec <- fenv$saved_state$vec
+    compvec <- fenv$saved_state$compvec
+
+    orig_vec <- fenv$saved_state$orig_vec
+    orig_compvec <- fenv$saved_state$orig_compvec
+
     compvec_tbl <- fenv$saved_state$compvec_tbl
   }
 
@@ -214,7 +221,11 @@ run_harmonizeR <- function(vec, compvec) {
         # NOTE that vec_tbl is generated at the end of the loop
         saved_state <- list(index = i,
                             outvec = outvec,
-                            compvec_tbl = compvec_tbl)
+                            compvec_tbl = compvec_tbl,
+                            vec = vec,
+                            compvec = compvec,
+                            orig_vec = orig_vec,
+                            orig_compvec = orig_compvec)
 
         cat("Saving state as saved_state.rda")
         save(saved_state, file = paste0(rstudioapi::selectDirectory(), "/saved_state.rda"))
