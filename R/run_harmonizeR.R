@@ -48,34 +48,6 @@ run_harmonizeR <- function(vec, compvec) {
     return("Quitting interactive string matching tool...")
   }
 
-  # add or remove suffix ----------------------------------------------------
-  alter_suffix_prefix <- readline("Would you like to remove a prefix or suffix to vec (yes [y], no [n]): ")
-
-  alter_suffix_prefix <- bin_resp_not_recog(alter_suffix_prefix)
-
-  # if (tolower(alter_suffix_prefix) == "n") {
-  #   return("Quitting interactive string matching tool...")
-  # }
-  orig_vec <- vec
-
-  while (tolower(alter_suffix_prefix == "y")) {
-
-    regex_string <- readline("What is your replacement string? It can be literal or a regex (use '_' to mark spaces at the beginning or end of your input): ")
-    regex_string <- sub('_', " ", regex_string)
-
-    cat("\nThis is vec before the replacement: ")
-    print(vec)
-
-    vec <- gsub(regex_string, "", vec)
-
-    cat("\nThis is vec after the replacement: ")
-    print(vec)
-
-    alter_suffix_prefix <- readline("Would you like to remove another prefix or suffix (yes [y], no [n])? ")
-
-    alter_suffix_prefix <- bin_resp_not_recog(alter_suffix_prefix)
-  }
-
   # load save ---------------------------------------------------------------
 
   load_save <- readline("Would you like to load a saved state (yes [y], no [n]): ")
@@ -98,6 +70,62 @@ run_harmonizeR <- function(vec, compvec) {
   }
 
 
+  if (tolower(load_save == "n")) {
+
+    # add or remove suffix from vec -------------------------------------------
+
+    alter_vec <- readline("Would you like to remove a prefix or suffix to `vec` (yes [y], no [n]): ")
+
+    alter_vec <- bin_resp_not_recog(alter_vec)
+
+    orig_vec <- vec
+
+    while (tolower(alter_vec == "y")) {
+
+      regex_string <- readline("What is the pattern for replacement? It can be literal or a regex (use '_' to mark spaces at the beginning or end of your input): ")
+      regex_string <- sub('_', " ", regex_string)
+
+      replacement_string <- readline("What is the replacement string? It can be literal or a regex (use '_' to mark spaces at the beginning or end of your input): ")
+
+      cat("\nThis is vec before the replacement: ")
+      print(vec)
+
+      vec <- gsub(regex_string, replacement_string, vec)
+
+      cat("\nThis is vec after the replacement: ")
+      print(vec)
+
+      alter_vec <- readline("Would you like to remove another prefix or suffix (yes [y], no [n])? ")
+
+      alter_vec <- bin_resp_not_recog(alter_vec)
+    }
+
+    # add or remove suffix from compvec ---------------------------------------
+
+    alter_compvec <- readline("Would you like to remove a prefix or suffix to `compvec` (yes [y], no [n]): ")
+
+    alter_compvec <- bin_resp_not_recog(alter_compvec)
+
+    while (tolower(alter_compvec == "y")) {
+
+      regex_string <- readline("What is the pattern for replacement? It can be literal or a regex (use '_' to mark spaces at the beginning or end of your input): ")
+      regex_string <- sub('_', " ", regex_string)
+
+      replacement_string <- readline("What is the replacement string? It can be literal or a regex (use '_' to mark spaces at the beginning or end of your input): ")
+
+      cat("\nThis is vec before the replacement: ")
+      print(compvec)
+
+      compvec <- gsub(regex_string, replacement_string, compvec)
+
+      cat("\nThis is vec after the replacement: ")
+      print(compvec)
+
+      alter_compvec <- readline("Would you like to remove another prefix or suffix (yes [y], no [n])? ")
+
+      alter_compvec <- bin_resp_not_recog(alter_compvec)
+    }
+  }
   # start loop through vec --------------------------------------------------
 
   for (i in start_i:length(vec)) {
