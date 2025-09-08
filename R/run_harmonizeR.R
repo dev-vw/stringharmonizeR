@@ -79,6 +79,7 @@ run_harmonizeR <- function(vec, compvec) {
     alter_vec <- bin_resp_not_recog(alter_vec)
 
     orig_vec <- vec
+    orig_compvec <- compvec
 
     while (tolower(alter_vec == "y")) {
 
@@ -193,8 +194,8 @@ run_harmonizeR <- function(vec, compvec) {
           new_string <- tolower(readline("Please enter your custom string: "))
           outvec[i] <- new_string
 
-          if (any(new_string == tolower(compvec))) {
-            compindex <- which(new_string == tolower(compvec))
+          if (any(new_string == tolower(orig_compvec))) {
+            compindex <- which(new_string == tolower(orig_compvec))
             compvec_tbl$matchname[compindex] <- new_string
           } else {
             compvec_tbl <- rbind(compvec_tbl,
